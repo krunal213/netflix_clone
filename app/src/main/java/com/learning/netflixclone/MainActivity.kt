@@ -1,14 +1,12 @@
 package com.learning.netflixclone
 
 import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-
 class MainActivity : AppCompatActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,30 +27,38 @@ class MainActivity : AppCompatActivity() {
         val adapter = MyRecyclerViewAdapter(this, animalNames)
         recyclerView.adapter = adapter
 
-        val nestedScrollView = findViewById<NestedScrollView>(R.id.nestedScrollView)
+        val textView = findViewById<TextView>(R.id.textview)
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var previousScrollY = 0.0f
-            var initialScrollViewPosition = nestedScrollView.y
+            var initialScrollViewPosition = textView.y
             var shouldInitialize = true
+            var clipHeight = 0f // Dynamic height for clipping
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val isScrollingUp = dy > previousScrollY
-                val isVisible = nestedScrollView.y >= 0.0f
-                val beforeInitialPosition = nestedScrollView.y < initialScrollViewPosition
-
+                val isVisible = textView.y >= 0.0f
+                val beforeInitialPosition = textView.y < initialScrollViewPosition
                 if (isScrollingUp && isVisible) {
                     if (shouldInitialize) {
-                        initialScrollViewPosition = nestedScrollView.y
+                        initialScrollViewPosition = textView.y
                         shouldInitialize = false
                     }
-                    nestedScrollView.y = nestedScrollView.y - dy
+                    textView.y = textView.y - dy
                 } else if (!isScrollingUp) {
                     if (beforeInitialPosition) {
-                        nestedScrollView.y = nestedScrollView.y - dy
+                        textView.y = textView.y - dy
                     } else {
                         if (!shouldInitialize) {
-                            nestedScrollView.y = initialScrollViewPosition
+                            textView.y = initialScrollViewPosition
                         }
                     }
+                }
+                if (dy > 0 && textView.height > clipHeight) { // Scrolling up
+                    clipHeight += dy
+                    textView.clipBounds = android.graphics.Rect(
+                        0, clipHeight.toInt(), textView.width, textView.height
+                    )
+                } else {
+
                 }
             }
         })
