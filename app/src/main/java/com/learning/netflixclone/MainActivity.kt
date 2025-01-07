@@ -19,7 +19,8 @@ class MainActivity : AppCompatActivity() {
             "Tiger", "Giraffe", "Panda", "Dolphin", "Penguin",
             "Kangaroo", "Cheetah", "Gorilla", "Koala", "Polar Bear",
             "Zebra", "Octopus", "Owl", "Rhino", "Platypus",
-            "Chimpanzee", "Fox")
+            "Chimpanzee", "Fox"
+        )
 
         // set up the RecyclerView
         val recyclerView = findViewById<RecyclerView>(R.id.rvAnimals)
@@ -52,13 +53,31 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-                if (dy > 0 && textView.height > clipHeight) { // Scrolling up
-                    clipHeight += dy
-                    textView.clipBounds = android.graphics.Rect(
-                        0, clipHeight.toInt(), textView.width, textView.height
-                    )
+                if (dy == 0) {
+                    textView.post {
+                        textView.clipBounds = android.graphics.Rect(
+                            0, 0, textView.width, textView.height
+                        )
+                    }
+                    clipHeight = 0.toFloat()
+                } else if (dy > 0) { // Scrolling up
+                    textView.post {
+                        if (textView.height > clipHeight) {
+                                clipHeight += dy
+                                textView.clipBounds = android.graphics.Rect(
+                                    0, clipHeight.toInt(), textView.width, textView.height
+                                )
+                        }
+                    }
                 } else {
-
+                    if(isVisible){
+                        if(clipHeight>=0){
+                            textView.clipBounds = android.graphics.Rect(
+                                0,clipHeight.toInt() , textView.width, textView.height
+                            )
+                            clipHeight += dy
+                        }
+                    }
                 }
             }
         })
