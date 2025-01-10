@@ -1,5 +1,6 @@
 package com.learning.netflixclone
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -29,58 +30,24 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         val textView = findViewById<TextView>(R.id.textview)
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            var previousScrollY = 0.0f
-            var initialScrollViewPosition = textView.y
-            var shouldInitialize = true
-            var clipHeight = 0 // Dynamic height for clipping
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val isScrollingUp = dy > previousScrollY
-                val isVisible = textView.y >= 0.0f
-                val beforeInitialPosition = textView.y < initialScrollViewPosition
-                if (isScrollingUp && isVisible) {
-                    if (shouldInitialize) {
-                        initialScrollViewPosition = textView.y
-                        shouldInitialize = false
-                    }
-                    textView.y = textView.y - dy
-                } else if (!isScrollingUp) {
-                    if (beforeInitialPosition) {
-                        textView.y = textView.y - dy
-                    } else {
-                        if (!shouldInitialize) {
-                            textView.y = initialScrollViewPosition
-                        }
-                    }
+        recyclerView.addOnScrollListener(object : OnScrollListener() {
+            override fun setClipBounds(clipHeight: Int) {
+                textView.post {
+                    textView.clipBounds = Rect(
+                        0, clipHeight, textView.width, textView.height
+                    )
                 }
-                if (dy == 0) {
-                    clipHeight = 0
-                    textView.post {
-                        textView.clipBounds = android.graphics.Rect(
-                            0, clipHeight, textView.width, textView.height
-                        )
-                    }
-                } else if (dy > 0) {
-                    textView.post {
-                        if (textView.height > clipHeight) {
-                            clipHeight = clipHeight.plus(dy).coerceIn(0, 167)
-                            textView.clipBounds = android.graphics.Rect(
-                                0, clipHeight, textView.width, textView.height
-                            )
-                        }
-                    }
-                } else {
-                    if (isVisible) {
-                        if (clipHeight >= 0) {
-                            clipHeight = clipHeight.plus(dy).coerceIn(0, 167)
-                            textView.clipBounds = android.graphics.Rect(
-                                0, clipHeight, textView.width, textView.height
-                            )
-                        }
-                    }
-                }
-                println("Clip Height : $clipHeight  $dy ${textView.height}")
             }
+
+            override fun scrolledY(Y: Float) {
+                textView.y = Y
+            }
+
+            override fun getY() = textView.y
+
+            override fun getHeight() = textView.height
+
         })
+
     }
 }
