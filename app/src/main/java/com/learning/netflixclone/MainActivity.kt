@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
             var previousScrollY = 0.0f
             var initialScrollViewPosition = textView.y
             var shouldInitialize = true
-            var clipHeight = 0f // Dynamic height for clipping
+            var clipHeight = 0 // Dynamic height for clipping
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val isScrollingUp = dy > previousScrollY
                 val isVisible = textView.y >= 0.0f
@@ -54,31 +54,32 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 if (dy == 0) {
+                    clipHeight = 0
                     textView.post {
                         textView.clipBounds = android.graphics.Rect(
-                            0, 0, textView.width, textView.height
+                            0, clipHeight, textView.width, textView.height
                         )
                     }
-                    clipHeight = 0.toFloat()
-                } else if (dy > 0) { // Scrolling up
+                } else if (dy > 0) {
                     textView.post {
                         if (textView.height > clipHeight) {
-                                clipHeight += dy
-                                textView.clipBounds = android.graphics.Rect(
-                                    0, clipHeight.toInt(), textView.width, textView.height
-                                )
+                            clipHeight = clipHeight.plus(dy).coerceIn(0, 167)
+                            textView.clipBounds = android.graphics.Rect(
+                                0, clipHeight, textView.width, textView.height
+                            )
                         }
                     }
                 } else {
-                    if(isVisible){
-                        if(clipHeight>=0){
+                    if (isVisible) {
+                        if (clipHeight >= 0) {
+                            clipHeight = clipHeight.plus(dy).coerceIn(0, 167)
                             textView.clipBounds = android.graphics.Rect(
-                                0,clipHeight.toInt() , textView.width, textView.height
+                                0, clipHeight, textView.width, textView.height
                             )
-                            clipHeight += dy
                         }
                     }
                 }
+                println("Clip Height : $clipHeight  $dy ${textView.height}")
             }
         })
     }
